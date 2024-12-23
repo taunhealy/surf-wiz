@@ -1,0 +1,88 @@
+---
+// You can fetch the initial data server-side if you want
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Wind Direction</title>
+  </head>
+  <body>
+    <main>
+      <h1>Current Wind Direction</h1>
+      <div class="wind-card">
+        <div class="wind-direction" id="windDirection">Loading...</div>
+        <div class="timestamp" id="timestamp"></div>
+        <button onclick="fetchWindDirection()">Refresh</button>
+      </div>
+    </main>
+  </body>
+</html>
+
+<style>
+  body {
+    font-family: system-ui, sans-serif;
+    display: grid;
+    place-items: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: #f4f4f5;
+  }
+
+  main {
+    text-align: center;
+  }
+
+  .wind-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .wind-direction {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin: 1rem 0;
+  }
+
+  .timestamp {
+    color: #666;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+  }
+
+  button {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  button:hover {
+    background: #2563eb;
+  }
+</style>
+
+<script>
+  async function fetchWindDirection() {
+    try {
+      const response = await fetch('/api/wind-direction');
+      const data = await response.json();
+      
+      document.getElementById('windDirection')!.textContent = data.direction;
+      document.getElementById('timestamp')!.textContent = 
+        `Last updated: ${new Date(data.timestamp).toLocaleString()}`;
+    } catch (error) {
+      console.error('Error:', error);
+      document.getElementById('windDirection')!.textContent = 'Error fetching data';
+    }
+  }
+
+  // Fetch when page loads
+  fetchWindDirection();
+</script> 
