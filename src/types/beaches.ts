@@ -935,7 +935,7 @@ export const beachData: Beach[] = [
     sharkRisk: "Low",
   },
   {
-    name: "Hawston",
+    name: "Hawston 💀🔫",
     region: "Western Cape",
     location: "Hawston",
     distanceFromCT: 35,
@@ -1580,7 +1580,7 @@ export const beachData: Beach[] = [
     sharkRisk: "Low",
   },
   {
-    name: "Monwabisi",
+    name: "Monwabisi 💀🔫",
     region: "Western Cape",
     location: "Monwabisi",
     distanceFromCT: 40,
@@ -1612,7 +1612,7 @@ export const beachData: Beach[] = [
     sharkRisk: "High",
   },
   {
-    name: "Macassar",
+    name: "Macassar 💀🔫",
     region: "Western Cape",
     location: "Macassar",
     distanceFromCT: 35,

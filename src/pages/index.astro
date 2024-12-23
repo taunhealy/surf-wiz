@@ -4,7 +4,7 @@ import { beachData } from '../types/beaches';
 import type { WindData } from '../types/wind';
 import BeachContainer from '../components/BeachContainer';
 
-// Get wind data
+// Get initial wind data from API only
 let windData: WindData | null = null;
 try {
   const response = await fetch('/api/surf-conditions');
@@ -25,3 +25,27 @@ try {
     />
   </main>
 </Layout>
+
+<script>
+  // Client-side localStorage check
+  function checkStoredData() {
+    const storedData = localStorage.getItem('windData');
+    const storedTimestamp = localStorage.getItem('windDataTimestamp');
+    
+    if (storedData && storedTimestamp) {
+      const timestamp = parseInt(storedTimestamp);
+      // Check if data is less than 30 minutes old
+      if (Date.now() - timestamp < 30 * 60 * 1000) {
+        const windDataElement = document.querySelector('[data-wind-data]');
+        if (windDataElement) {
+          windDataElement.dispatchEvent(new CustomEvent('update-wind-data', {
+            detail: JSON.parse(storedData)
+          }));
+        }
+      }
+    }
+  }
+
+  // Run check when page loads
+  checkStoredData();
+</script>

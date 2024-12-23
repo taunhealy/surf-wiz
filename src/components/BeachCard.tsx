@@ -66,7 +66,7 @@ export default function BeachCard({
         </p>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .beach-card {
           background: white;
           border-radius: 8px;

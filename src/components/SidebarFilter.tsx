@@ -3,12 +3,16 @@ import type { Beach } from "../types/beaches";
 
 interface SidebarFilterProps {
   beaches: Beach[];
-  onFilterChange: (filteredBeaches: Beach[]) => void;
+  onFilterChange: (beaches: Beach[]) => void;
+  minPoints: number;
+  onMinPointsChange: (points: number) => void;
 }
 
 export default function SidebarFilter({
   beaches,
   onFilterChange,
+  minPoints,
+  onMinPointsChange,
 }: SidebarFilterProps) {
   const [filters, setFilters] = useState({
     difficulty: [] as string[],
@@ -75,8 +79,10 @@ export default function SidebarFilter({
   };
 
   return (
-    <div className="sidebar">
-      <h2>Filter Surf Spots</h2>
+    <div className="filter-container">
+      <h3>Filters</h3>
+
+      <div className="filter-section"></div>
 
       <div className="filter-section">
         <h3>Difficulty</h3>
@@ -166,6 +172,49 @@ export default function SidebarFilter({
         />
         <span>{filters.maxWaveHeight}m</span>
       </div>
+
+      <style>{`
+        .star-filter {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          margin-top: 0.5rem;
+        }
+
+        .star-button {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          width: 100%;
+          background: white;
+          border: 1px solid #ddd;
+          padding: 0.75rem 1rem;
+          border-radius: 4px;
+          cursor: pointer;
+          transition: all 0.2s;
+          font-size: 0.9rem;
+          color: #333;
+        }
+
+        .star-button:hover {
+          background: #f5f5f5;
+          border-color: #ccc;
+        }
+
+        .star-button.active {
+          background: #e6ffe6;
+          border-color: #4CAF50;
+        }
+
+        .star-label {
+          font-weight: 500;
+        }
+
+        .stars {
+          font-size: 0.8rem;
+          letter-spacing: 2px;
+        }
+      `}</style>
     </div>
   );
 }
