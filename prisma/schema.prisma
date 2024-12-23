@@ -1,0 +1,47 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String        @id
+  email         String       @unique
+  hashedPassword String
+  name          String?
+  subscription  Subscription?
+  sessions      Session[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+model Session {
+  id        String   @id
+  userId    String
+  expiresAt DateTime
+  user      User     @relation(references: [id], fields: [userId], onDelete: Cascade)
+}
+
+model SurfConditions {
+  id             String   @id @default(cuid())
+  timestamp      DateTime @default(now())
+  windDirection  String
+  windSpeed      Float?
+  swellHeight    Float
+  swellPeriod    Float
+  swellDirection String
+}
+
+model Subscription {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+  status      String
+  variantId   Int
+  checkoutUrl String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

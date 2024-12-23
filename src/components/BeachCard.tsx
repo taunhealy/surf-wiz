@@ -22,11 +22,11 @@ export default function BeachCard({
         {suitability && (
           <div className="score">
             {suitability.score === 4
-              ? "🏄‍♂️ PERFECT!"
+              ? "🏄‍♂️😮⚡ YEEEWWW!!!⚡😮🏄‍♂️"
               : suitability.score === 3
-              ? "🏄‍♂️ Great"
+              ? "🏄‍♂️ Wet"
               : suitability.score === 2
-              ? "👍 Good"
+              ? "👍"
               : suitability.score === 1
               ? "🤔 Fair"
               : "⚠️ Poor"}

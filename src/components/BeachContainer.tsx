@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Beach } from "../types/beaches";
 import type { WindData } from "../types/wind";
 import SidebarFilter from "./SidebarFilter";
@@ -7,16 +7,32 @@ import BeachGrid from "./BeachGrid";
 interface BeachContainerProps {
   initialBeaches: Beach[];
   windData: WindData | null;
+  isSubscribed: boolean;
 }
 
 export default function BeachContainer({
   initialBeaches,
   windData: initialWindData,
+  isSubscribed,
 }: BeachContainerProps) {
   const [filteredBeaches, setFilteredBeaches] = useState(initialBeaches);
   const [windData, setWindData] = useState(initialWindData);
   const [isLoading, setIsLoading] = useState(false);
   const [minPoints, setMinPoints] = useState(0);
+
+  useEffect(() => {
+    if (windData) {
+      const sortedBeaches = initialBeaches
+        .map((beach) => ({
+          beach,
+          score: isBeachSuitable(beach, windData).score,
+        }))
+        .sort((a, b) => b.score - a.score)
+        .map(({ beach }) => beach);
+
+      setFilteredBeaches(sortedBeaches);
+    }
+  }, []);
 
   async function refreshData(e: React.FormEvent) {
     e.preventDefault();
@@ -98,6 +114,26 @@ export default function BeachContainer({
     setFilteredBeaches(filteredAndSorted);
   };
 
+  // Limit beaches for non-subscribed users
+  const displayedBeaches = isSubscribed
+    ? filteredBeaches
+    : filteredBeaches.slice(0, 1);
+
+  async function handleSubscribe() {
+    try {
+      const response = await fetch("/api/create-checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const { url } = await response.json();
+      window.location.href = url;
+    } catch (error) {
+      console.error("Failed to create checkout:", error);
+    }
+  }
+
   return (
     <div className="beach-container">
       <aside className="sidebar">
@@ -110,10 +146,18 @@ export default function BeachContainer({
       </aside>
       <main className="main-content">
         <BeachGrid
-          beaches={filteredBeaches}
+          beaches={displayedBeaches}
           windData={windData}
           isBeachSuitable={isBeachSuitable}
         />
+        {!isSubscribed && filteredBeaches.length > 1 && (
+          <div className="subscription-prompt">
+            <p>Subscribe to see {filteredBeaches.length - 1} more surf spots</p>
+            <button onClick={handleSubscribe} className="subscribe-btn">
+              Subscribe for $3/month
+            </button>
+          </div>
+        )}
       </main>
       <aside className="wind-sidebar">
         <div className="wind-card">

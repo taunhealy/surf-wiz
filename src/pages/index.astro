@@ -4,7 +4,11 @@ import { beachData } from '../types/beaches';
 import type { WindData } from '../types/wind';
 import BeachContainer from '../components/BeachContainer';
 
-// Get initial wind data from API only
+// Get auth and subscription status from locals
+const session = Astro.locals.session;
+const isSubscribed = session?.user?.subscription?.status === 'active';
+
+// Get initial wind data
 let windData: WindData | null = null;
 try {
   const response = await fetch('/api/surf-conditions');
@@ -16,36 +20,90 @@ try {
 ---
 
 <Layout>
-  <main>
+  <header class="navbar">
     <h1>Cape Town Surf Spots</h1>
+    <div class="auth-buttons">
+      {!session ? (
+        <button id="login" class="auth-btn">Login</button>
+      ) : (
+        <button id="logout" class="auth-btn">Logout</button>
+      )}
+    </div>
+  </header>
+  
+  <main>
     <BeachContainer
       client:load
       initialBeaches={beachData}
       windData={windData}
+      isSubscribed={isSubscribed}
     />
   </main>
 </Layout>
 
 <script>
-  // Client-side localStorage check
-  function checkStoredData() {
-    const storedData = localStorage.getItem('windData');
-    const storedTimestamp = localStorage.getItem('windDataTimestamp');
-    
-    if (storedData && storedTimestamp) {
-      const timestamp = parseInt(storedTimestamp);
-      // Check if data is less than 30 minutes old
-      if (Date.now() - timestamp < 30 * 60 * 1000) {
-        const windDataElement = document.querySelector('[data-wind-data]');
-        if (windDataElement) {
-          windDataElement.dispatchEvent(new CustomEvent('update-wind-data', {
-            detail: JSON.parse(storedData)
-          }));
-        }
-      }
-    }
+  import { authClient } from "../lib/auth-client";
+  
+  document.querySelector('#login')?.addEventListener('click', () => {
+    authClient.signIn();
+  });
+
+  document.querySelector('#logout')?.addEventListener('click', () => {
+    authClient.signOut();
+  });
+</script>
+
+<style>
+  .navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
 
-  // Run check when page loads
-  checkStoredData();
-</script>
+  .auth-buttons {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .auth-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    border: none;
+    background: #3498db;
+    color: white;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .auth-btn:hover {
+    background: #2980b9;
+  }
+
+  .subscription-prompt {
+    text-align: center;
+    padding: 2rem;
+    background: rgba(52, 152, 219, 0.1);
+    border-radius: 8px;
+    margin-top: 2rem;
+    border: 2px dashed #3498db;
+  }
+
+  .subscribe-btn {
+    background: #27ae60;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    margin-top: 1rem;
+    transition: background-color 0.2s;
+  }
+
+  .subscribe-btn:hover {
+    background: #219a52;
+  }
+</style>
