@@ -1,0 +1,90 @@
+---
+interface Props {
+  region: string;
+}
+
+const { region } = Astro.props;
+
+const swellInsights = {
+  atlantic: {
+    name: "Atlantic-facing beaches",
+    examples: "Llandudno, Camps Bay",
+    swellRange: "SW to NW (225° - 315°)",
+    description: "Work best with strong SW to NW swells, particularly during winter months."
+  },
+  falseBay: {
+    name: "False Bay beaches",
+    examples: "Muizenberg, Kalk Bay",
+    swellRange: "SW to NW (225° - 315°)",
+    description: "Protected from SE winds, best with SW to NW swells. More suitable for beginners."
+  },
+  kommetjie: {
+    name: "Kommetjie area",
+    examples: "Long Beach, Outer Kom",
+    swellRange: "S to SW (157.5° - 247.5°)",
+    description: "Consistent surf zone working best with S to SW swells. Handles size well."
+  }
+};
+---
+
+<div class="insights-container">
+  <h2>Regional Surf Insights</h2>
+  <div class="insights-grid">
+    {Object.values(swellInsights).map(insight => (
+      <div class="insight-card">
+        <h3>{insight.name}</h3>
+        <p class="examples">Notable spots: {insight.examples}</p>
+        <p class="swell-range">Optimal swell: {insight.swellRange}</p>
+        <p class="description">{insight.description}</p>
+      </div>
+    ))}
+  </div>
+</div>
+
+<style>
+  .insights-container {
+    margin: 2rem 0;
+    padding: 1rem;
+    background: #f5f5f5;
+    border-radius: 8px;
+  }
+
+  .insights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .insight-card {
+    background: white;
+    padding: 1rem;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  h2 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+  }
+
+  h3 {
+    color: #3498db;
+    margin-bottom: 0.5rem;
+  }
+
+  .examples {
+    font-style: italic;
+    color: #666;
+  }
+
+  .swell-range {
+    font-weight: bold;
+    color: #e67e22;
+  }
+
+  .description {
+    margin-top: 0.5rem;
+    line-height: 1.4;
+  }
+</style> 

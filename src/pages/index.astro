@@ -1,11 +1,27 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
+import { beachData } from '../types/beaches';
+import type { WindData } from '../types/wind';
+import BeachContainer from '../components/BeachContainer';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+// Get wind data
+let windData: WindData | null = null;
+try {
+  const response = await fetch('/api/surf-conditions');
+  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+  windData = await response.json();
+} catch (error) {
+  console.error('Failed to fetch wind data:', error);
+}
 ---
 
 <Layout>
-	<Welcome />
+  <main>
+    <h1>Cape Town Surf Spots</h1>
+    <BeachContainer
+      client:load
+      initialBeaches={beachData}
+      windData={windData}
+    />
+  </main>
 </Layout>
