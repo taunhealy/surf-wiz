@@ -7,4 +7,10 @@ export default defineConfig({
   integrations: [react(), auth()],
   output: "server",
   adapter: vercel(),
+  vite: {
+    build: {
+      minify: false,
+    },
+    logLevel: "info",
+  },
 });

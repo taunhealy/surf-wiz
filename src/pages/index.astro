@@ -11,7 +11,7 @@ const isSubscribed = session?.user?.subscription?.status === 'active';
 // Get initial wind data
 let windData: WindData | null = null;
 try {
-  const response = await fetch('http://localhost:3000/api/surf-conditions');
+  const response = await fetch('/api/surf-conditions');
   if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
   windData = await response.json();
 } catch (error) {
