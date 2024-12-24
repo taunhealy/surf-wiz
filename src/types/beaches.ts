@@ -37,6 +37,14 @@ export interface Beach {
   sharkRisk: "Low" | "Medium" | "High";
 }
 
+export interface WindData {
+  windDirection: string;
+  windSpeed: number;
+  swellDirection: string;
+  swellHeight: number;
+  swellPeriod: number;
+}
+
 export const beachData: Beach[] = [
   {
     name: "Muizenberg",

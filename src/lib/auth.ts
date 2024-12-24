@@ -1,14 +1,29 @@
 import { Auth } from "@auth/core";
-import type { AuthConfig } from "@auth/core";
 import Google from "@auth/core/providers/google";
+import type { AuthConfig } from "@auth/core/types";
 
-export const auth = new (Auth as any)({
-  secret: import.meta.env.AUTH_SECRET,
-  trustHost: true,
+export const authConfig: AuthConfig = {
   providers: [
     Google({
-      clientId: import.meta.env.GOOGLE_CLIENT_ID,
-      clientSecret: import.meta.env.GOOGLE_CLIENT_SECRET,
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code",
+        },
+      },
     }),
   ],
-} as AuthConfig);
+  trustHost: true,
+  debug: true,
+  pages: {
+    signIn: "/login",
+    error: "/error",
+  },
+};
+
+export const auth = async (request: Request) => {
+  return await Auth(request, authConfig);
+};

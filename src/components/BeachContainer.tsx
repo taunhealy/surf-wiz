@@ -119,19 +119,10 @@ export default function BeachContainer({
     ? filteredBeaches
     : filteredBeaches.slice(0, 1);
 
-  async function handleSubscribe() {
-    try {
-      const response = await fetch("/api/create-checkout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      const { url } = await response.json();
-      window.location.href = url;
-    } catch (error) {
-      console.error("Failed to create checkout:", error);
-    }
+  function handleSubscribe() {
+    // Replace with your actual LemonSqueezy product URL
+    window.location.href =
+      "https://yeeewww.lemonsqueezy.com/buy/cd727ca6-185c-4850-a41d-2c595438be62";
   }
 
   return (

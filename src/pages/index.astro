@@ -1,17 +1,17 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import { beachData } from '../types/beaches';
-import type { WindData } from '../types/wind';
+import { getSession } from 'auth-astro/server';
 import BeachContainer from '../components/BeachContainer';
+import { beachData } from '../types/beaches';
+import type { Beach, WindData } from '../types/beaches';
 
-// Get auth and subscription status from locals
-const session = Astro.locals.session;
+const session = await getSession(Astro.request);
 const isSubscribed = session?.user?.subscription?.status === 'active';
 
 // Get initial wind data
 let windData: WindData | null = null;
 try {
-  const response = await fetch('/api/surf-conditions');
+  const response = await fetch('http://localhost:3000/api/surf-conditions');
   if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
   windData = await response.json();
 } catch (error) {
@@ -24,34 +24,26 @@ try {
     <h1>Cape Town Surf Spots</h1>
     <div class="auth-buttons">
       {!session ? (
-        <button id="login" class="auth-btn">Login</button>
+        <button onclick="signIn('google')" class="auth-btn">Sign in with Google</button>
       ) : (
-        <button id="logout" class="auth-btn">Logout</button>
+        <button onclick="signOut()" class="auth-btn">Sign out</button>
       )}
     </div>
   </header>
-  
-  <main>
-    <BeachContainer
-      client:load
-      initialBeaches={beachData}
-      windData={windData}
-      isSubscribed={isSubscribed}
-    />
-  </main>
+
+  <BeachContainer 
+    initialBeaches={beachData}
+    windData={windData}
+    isSubscribed={isSubscribed}
+    client:load
+  />
+
+  <script>
+    const { signIn, signOut } = await import("auth-astro/client");
+    window.signIn = signIn;
+    window.signOut = signOut;
+  </script>
 </Layout>
-
-<script>
-  import { authClient } from "../lib/auth-client";
-  
-  document.querySelector('#login')?.addEventListener('click', () => {
-    authClient.signIn();
-  });
-
-  document.querySelector('#logout')?.addEventListener('click', () => {
-    authClient.signOut();
-  });
-</script>
 
 <style>
   .navbar {
