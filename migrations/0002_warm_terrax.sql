@@ -1,0 +1,1 @@
+ALTER TABLE `session` ALTER COLUMN "user_id" TO "user_id" text NOT NULL REFERENCES user(id) ON DELETE no action ON UPDATE no action;

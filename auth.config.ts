@@ -1,6 +1,6 @@
 import Google from "@auth/core/providers/google";
 import { defineConfig } from "auth-astro";
-import { DrizzleAdapter } from "./lib/auth-adapter";
+import { DrizzleAdapter } from "./src/lib/auth-adapter"
 import "dotenv/config";
 
 if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
@@ -22,6 +22,14 @@ export default defineConfig({
       },
     }),
   ],
+  callbacks: {
+    session({ session, user }) {
+      if (session.user) {
+        session.user.id = user.id;
+      }
+      return session;
+    },
+  },
   secret: process.env.AUTH_SECRET,
   trustHost: true,
   debug: true,

@@ -11,9 +11,10 @@ const isSubscribed = session?.user?.subscription?.status === 'active';
 // Get initial wind data
 let windData: WindData | null = null;
 try {
-  const response = await fetch('/api/surf-conditions');
+  const response = await fetch(new URL('/api/surf-conditions', Astro.url));
   if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-  windData = await response.json();
+  const { data } = await response.json();
+  windData = data;
 } catch (error) {
   console.error('Failed to fetch wind data:', error);
 }
@@ -23,10 +24,25 @@ try {
   <header class="navbar">
     <h1>Cape Town Surf Spots</h1>
     <div class="auth-buttons">
-      {!session ? (
-        <button onclick="signIn('google')" class="auth-btn">Sign in with Google</button>
+      {isSubscribed ? (
+        <button
+          class="subscribe-btn"
+          onclick="handleUnsubscribe()"
+        >
+          Cancel Subscription
+        </button>
       ) : (
-        <button onclick="signOut()" class="auth-btn">Sign out</button>
+        <button
+          class="subscribe-btn"
+          onclick="handleSubscribe()"
+        >
+          Subscribe
+        </button>
+      )}
+      {session ? (
+        <button class="auth-btn" onclick="signOut()">Sign Out</button>
+      ) : (
+        <button class="auth-btn" onclick="signIn('google')">Sign In</button>
       )}
     </div>
   </header>
@@ -42,6 +58,70 @@ try {
     const { signIn, signOut } = await import("auth-astro/client");
     window.signIn = signIn;
     window.signOut = signOut;
+
+    async function handleSubscribe() {
+      try {
+        const response = await fetch('/api/auth/session');
+        const session = await response.json();
+
+        if (!session?.user) {
+          await signIn('google');
+          return;
+        }
+
+        const checkoutResponse = await fetch('/api/create-checkout/route', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (!checkoutResponse.ok) {
+          throw new Error('Failed to create checkout');
+        }
+
+        const { url } = await checkoutResponse.json();
+        window.open(url, '_blank');
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to start checkout process. Please try again.');
+      }
+    }
+
+    async function handleUnsubscribe() {
+      try {
+        const response = await fetch('/api/auth/session');
+        const session = await response.json();
+
+        if (!session?.user?.id) {
+          alert('Please sign in first');
+          return;
+        }
+
+        const unsubResponse = await fetch('/api/test-webhook/route', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            userId: session.user.id,
+            action: 'unsubscribe'
+          })
+        });
+
+        if (!unsubResponse.ok) {
+          throw new Error('Failed to unsubscribe');
+        }
+
+        window.location.reload();
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to unsubscribe. Please try again.');
+      }
+    }
+
+    window.handleSubscribe = handleSubscribe;
+    window.handleUnsubscribe = handleUnsubscribe;
   </script>
 </Layout>
 
@@ -58,6 +138,7 @@ try {
   .auth-buttons {
     display: flex;
     gap: 1rem;
+    align-items: center;
   }
 
   .auth-btn {
@@ -87,11 +168,10 @@ try {
     background: #27ae60;
     color: white;
     border: none;
-    padding: 0.75rem 1.5rem;
+    padding: 0.5rem 1rem;
     border-radius: 4px;
     cursor: pointer;
     font-weight: 500;
-    margin-top: 1rem;
     transition: background-color 0.2s;
   }
 

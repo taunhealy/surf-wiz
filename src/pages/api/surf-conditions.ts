@@ -1,32 +1,18 @@
 import type { APIRoute } from "astro";
 import axios from "axios";
 import * as cheerio from "cheerio";
-
-function degreesToCardinal(degrees: number): string {
-  const directions = [
-    "N",
-    "NNE",
-    "NE",
-    "ENE",
-    "E",
-    "ESE",
-    "SE",
-    "SSE",
-    "S",
-    "SSW",
-    "SW",
-    "WSW",
-    "W",
-    "WNW",
-    "NW",
-    "NNW",
-  ];
-  const index = Math.round((degrees % 360) / 22.5);
-  return directions[index % 16];
-}
+import { HARDCODED_WIND_DATA } from "../../types/wind";
 
 export const GET: APIRoute = async () => {
   try {
+    // Return hardcoded data for now
+    return new Response(JSON.stringify({
+      data: HARDCODED_WIND_DATA,
+      timestamp: Date.now()
+    }));
+
+    // Keep scraping code commented out for future use
+    /*
     console.log("Fetching new data from swell.co.za...");
     const response = await axios.get("https://swell.co.za/ct/simple");
     const html = response.data;
@@ -66,33 +52,10 @@ export const GET: APIRoute = async () => {
     const swellDirectionSelector =
       'div[style*="display:block"][style*="width: 49px"][style*="height:20px"][style*="line-height:20px"][style*="text-align: center"][style*="float:left"][style*="background-color: rgb(255, 154, 0)"][style*="color: rgb(0,0,0)"]';
     const swellDirectionElement = $(swellDirectionSelector).first();
-    const swellDirection = swellDirectionElement.text().trim().replace("°", "");
-    const swellDirectionDegrees = parseInt(swellDirection) || 0;
-    const swellDirectionCardinal = degreesToCardinal(swellDirectionDegrees);
+    */
 
-    const data = {
-      wind: {
-        direction: windDirection || "Unknown",
-        cardinalDirection: windDirection,
-        speed: 0,
-      },
-      swell: {
-        height: waveHeight,
-        period: swellPeriod,
-        direction: swellDirection || "Unknown",
-        cardinalDirection: swellDirectionCardinal,
-      },
-      timestamp: new Date().toISOString(),
-    };
-
-    return new Response(JSON.stringify(data), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error fetching surf conditions:", error);
     return new Response(
       JSON.stringify({ error: "Failed to fetch surf conditions" }),
       { status: 500 }

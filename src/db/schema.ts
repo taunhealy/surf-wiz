@@ -1,3 +1,4 @@
+import { relations } from 'drizzle-orm';
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
 
 export const users = sqliteTable('user', {
@@ -11,9 +12,15 @@ export const users = sqliteTable('user', {
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().defaultNow(),
 });
 
+export const usersRelations = relations(users, ({ many }) => ({
+  accounts: many(accounts),
+  sessions: many(sessions),
+  subscriptions: many(subscriptions)
+}));
+
 export const accounts = sqliteTable('account', {
   id: text('id').primaryKey(),
-  userId: text('user_id').notNull(),
+  userId: text('user_id').notNull().references(() => users.id),
   type: text('type').notNull(),
   provider: text('provider').notNull(),
   providerAccountId: text('provider_account_id').notNull(),
@@ -26,22 +33,26 @@ export const accounts = sqliteTable('account', {
   sessionState: text('session_state'),
 });
 
+export const accountsRelations = relations(accounts, ({ one }) => ({
+  user: one(users, {
+    fields: [accounts.userId],
+    references: [users.id],
+  }),
+}));
+
 export const sessions = sqliteTable('session', {
   id: text('id').primaryKey(),
-  userId: text('user_id').notNull(),
+  userId: text('user_id').notNull().references(() => users.id),
   sessionToken: text('session_token').notNull().unique(),
   expires: integer('expires', { mode: 'timestamp' }).notNull(),
 });
 
-export const surfConditions = sqliteTable('surf_conditions', {
-  id: text('id').primaryKey(),
-  timestamp: integer('timestamp', { mode: 'timestamp' }).notNull().defaultNow(),
-  windDirection: text('wind_direction').notNull(),
-  windSpeed: integer('wind_speed'),
-  swellHeight: integer('swell_height').notNull(),
-  swellPeriod: integer('swell_period').notNull(),
-  swellDirection: text('swell_direction').notNull(),
-});
+export const sessionsRelations = relations(sessions, ({ one }) => ({
+  user: one(users, {
+    fields: [sessions.userId],
+    references: [users.id],
+  }),
+}));
 
 export const subscriptions = sqliteTable('subscription', {
   id: text('id').primaryKey(),

@@ -42,18 +42,18 @@ export default function BeachContainer({
       const response = await fetch("/api/surf-conditions");
       if (!response.ok)
         throw new Error(`HTTP error! status: ${response.status}`);
-      const newData = await response.json();
-      setWindData(newData);
+      const { data } = await response.json();
+      setWindData(data);
 
       // Store the new data in localStorage
-      localStorage.setItem("windData", JSON.stringify(newData));
+      localStorage.setItem("windData", JSON.stringify(data));
       localStorage.setItem("windDataTimestamp", Date.now().toString());
 
       // Sort beaches immediately after getting new wind data
       const sortedBeaches = initialBeaches
         .map((beach) => ({
           beach,
-          score: isBeachSuitable(beach, newData).score,
+          score: isBeachSuitable(beach, data).score,
         }))
         .sort((a, b) => b.score - a.score)
         .map(({ beach }) => beach);
@@ -119,10 +119,76 @@ export default function BeachContainer({
     ? filteredBeaches
     : filteredBeaches.slice(0, 1);
 
-  function handleSubscribe() {
-    // Replace with your actual LemonSqueezy product URL
-    window.location.href =
-      "https://yeeewww.lemonsqueezy.com/buy/cd727ca6-185c-4850-a41d-2c595438be62";
+  async function handleSubscribe() {
+    try {
+      // First check if user is authenticated
+      const response = await fetch('/api/auth/session');
+      const session = await response.json();
+
+      if (!session?.user) {
+        // If not authenticated, trigger sign in with error handling
+        try {
+          await window.signIn('google');
+        } catch (authError) {
+          console.error('Authentication error:', authError);
+          alert('Authentication failed. Please try again.');
+          return;
+        }
+        return;
+      }
+
+      // If authenticated, proceed with checkout
+      const checkoutResponse = await fetch('/api/create-checkout/route', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!checkoutResponse.ok) {
+        throw new Error('Failed to create checkout');
+      }
+
+      const { url } = await checkoutResponse.json();
+      window.open(url, '_blank');
+    } catch (error) {
+      console.error('Error creating checkout:', error);
+      alert('Failed to start checkout process. Please try again.');
+    }
+  }
+
+  async function handleUnsubscribe() {
+    try {
+      const response = await fetch('/api/auth/session');
+      const session = await response.json();
+
+      if (!session?.user?.id) {
+        alert('Please sign in first');
+        return;
+      }
+
+      // Simulate webhook for unsubscribe
+      const unsubResponse = await fetch('/api/test-webhook/route', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          userId: session.user.id,
+          action: 'unsubscribe'
+        })
+      });
+
+      if (!unsubResponse.ok) {
+        throw new Error('Failed to unsubscribe');
+      }
+
+      // Refresh the page to update subscription status
+      window.location.reload();
+    } catch (error) {
+      console.error('Error unsubscribing:', error);
+      alert('Failed to unsubscribe. Please try again.');
+    }
   }
 
   return (
@@ -143,12 +209,14 @@ export default function BeachContainer({
         />
         {!isSubscribed && filteredBeaches.length > 1 && (
           <div className="subscription-prompt">
-            <p>Subscribe to see {filteredBeaches.length - 1} more surf spots</p>
+            <h3>Get Full Access to All Surf Spots</h3>
+            <p>See {filteredBeaches.length - 1} more premium surf spots</p>
             <button onClick={handleSubscribe} className="subscribe-btn">
-              Subscribe for $3/month
+              Upgrade Now
             </button>
           </div>
         )}
+        
       </main>
       <aside className="wind-sidebar">
         <div className="wind-card">

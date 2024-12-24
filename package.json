@@ -4,11 +4,13 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
-    "build": "prisma generate && astro build",
+    "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "db:generate": "drizzle-kit generate:sqlite",
-    "db:push": "drizzle-kit push:sqlite"
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio",
+    "db:migrate": "drizzle-kit migrate"
   },
   "dependencies": {
     "@astrojs/node": "^9.0.0",
@@ -18,7 +20,6 @@
     "@auth/prisma-adapter": "^2.7.4",
     "@lemonsqueezy/lemonsqueezy.js": "^4.0.0",
     "@libsql/client": "^0.14.0",
-    "@prisma/client": "^6.1.0",
     "astro": "^5.1.1",
     "auth-astro": "^4.2.0",
     "axios": "^1.7.9",
@@ -27,10 +28,11 @@
     "cheerio": "^1.0.0",
     "dotenv": "^16.4.7",
     "drizzle-orm": "^0.38.2",
+    "drizzle-zod": "^0.6.0",
     "node-cron": "^3.0.3",
-    "prisma": "^6.1.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "vercel": "^39.2.2"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
