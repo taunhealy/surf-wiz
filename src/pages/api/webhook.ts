@@ -1,10 +1,9 @@
 import type { APIRoute } from "astro";
-import { PrismaClient } from "@prisma/client";
 import { createHmac } from "crypto";
+import { db } from "../../db";
+import { subscriptions } from "../../db/schema";
+import { eq } from "drizzle-orm";
 
-const prisma = new PrismaClient();
-
-// Verify LemonSqueezy webhook signature
 function verifySignature(payload: string, signature: string) {
   const hmac = createHmac("sha256", process.env.LEMON_SQUEEZY_WEBHOOK_SECRET!);
   const digest = hmac.update(payload).digest("hex");
@@ -27,18 +26,20 @@ export const POST: APIRoute = async ({ request }) => {
     switch (eventName) {
       case "subscription_created":
       case "subscription_resumed":
-        await prisma.subscription.upsert({
-          where: { userId },
-          create: {
+        await db
+          .insert(subscriptions)
+          .values({
             userId,
             status: "active",
             lemonSqueezyId: payload.data.id,
-          },
-          update: {
-            status: "active",
-            lemonSqueezyId: payload.data.id,
-          },
-        });
+          })
+          .onConflictDoUpdate({
+            target: subscriptions.userId,
+            set: {
+              status: "active",
+              lemonSqueezyId: payload.data.id,
+            },
+          });
         break;
     }
   } catch (error) {

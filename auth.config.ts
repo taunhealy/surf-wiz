@@ -1,22 +1,14 @@
 import Google from "@auth/core/providers/google";
 import { defineConfig } from "auth-astro";
-import { PrismaAdapter } from "@auth/prisma-adapter";
-import { PrismaClient } from "@prisma/client";
+import { DrizzleAdapter } from "./lib/auth-adapter";
 import "dotenv/config";
-
-const prisma = new PrismaClient();
-
-console.log("ENV CHECK:", {
-  clientId: process.env.GOOGLE_CLIENT_ID,
-  secret: process.env.AUTH_SECRET,
-});
 
 if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
   throw new Error("Missing Google OAuth credentials");
 }
 
 export default defineConfig({
-  adapter: PrismaAdapter(prisma),
+  adapter: DrizzleAdapter(),
   providers: [
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID,
