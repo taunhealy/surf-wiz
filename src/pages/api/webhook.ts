@@ -14,15 +14,15 @@ function verifySignature(payload: string, signature: string) {
 export const POST: APIRoute = async ({ request }) => {
   const signature = request.headers.get("x-signature");
   const rawBody = await request.text();
-          data: {
+
   if (!signature || !verifySignature(rawBody, signature)) {
     return new Response("Invalid signature", { status: 401 });
-        });
-        break;
+  }
+
   const payload = JSON.parse(rawBody);
   const eventName = payload.meta.event_name;
   const userId = payload.meta.custom_data.userId;
-          where: {
+
   try {
     switch (eventName) {
       case "subscription_created":
@@ -37,3 +37,14 @@ export const POST: APIRoute = async ({ request }) => {
           update: {
             status: "active",
             lemonSqueezyId: payload.data.id,
+          },
+        });
+        break;
+    }
+  } catch (error) {
+    console.error("Error handling webhook:", error);
+    return new Response("Error handling webhook", { status: 500 });
+  }
+
+  return new Response("Webhook handled successfully", { status: 200 });
+};
